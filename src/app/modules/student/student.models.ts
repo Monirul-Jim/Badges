@@ -54,4 +54,4 @@ const studentSchema = new Schema<Student>({
   isActive: ["active", "blocked"],
   profileImg: { type: String },
 });
-const User = model<Student>("Student", studentSchema);
+export const StudentModel = model<Student>("Student", studentSchema);
