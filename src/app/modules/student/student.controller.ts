@@ -29,8 +29,12 @@ const getAllStudents = async (req: Request, res: Response) => {
       message: "student retrieve successfully",
       data: result,
     });
-  } catch (error) {
-    console.log(error);
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "something went wrong",
+      error: err,
+    });
   }
 };
 const getSingleStudent = async (req: Request, res: Response) => {
@@ -42,12 +46,34 @@ const getSingleStudent = async (req: Request, res: Response) => {
       message: "single student retrieve successfully",
       data: result,
     });
-  } catch (error) {
-    console.log(error);
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "something went wrong",
+      error: err,
+    });
+  }
+};
+const deleteSingleStudent = async (req: Request, res: Response) => {
+  try {
+    const { studentId } = req.params;
+    const result = await StudentServices.deleteSingleStudentFromDB(studentId);
+    res.status(200).json({
+      success: true,
+      message: " student deleted successfully",
+      data: result,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "something went wrong",
+      error: err,
+    });
   }
 };
 export const StudentControllers = {
   createStudent,
   getAllStudents,
   getSingleStudent,
+  deleteSingleStudent,
 };

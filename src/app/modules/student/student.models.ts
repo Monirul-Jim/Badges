@@ -7,7 +7,8 @@ import {
   StudentModel,
   TUserName,
 } from "./student.interface";
-
+import bcrypt from "bcrypt";
+import config from "../../config/config";
 // UserName Schema
 const userNameSchema = new Schema<TUserName>({
   firstName: {
@@ -84,6 +85,11 @@ const studentSchema = new Schema<TStudent, StudentModel>({
     unique: true,
     required: [true, "Student ID is required"],
   },
+  password: {
+    type: String,
+    required: [true, "password is required"],
+    maxlength: [20, "password can not be more than 20 characters"],
+  },
   name: {
     type: userNameSchema,
     required: [true, "Student's name is required"],
@@ -141,6 +147,37 @@ const studentSchema = new Schema<TStudent, StudentModel>({
   profileImg: {
     type: String,
   },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+// pre save middleware/hook
+studentSchema.pre("save", async function (next) {
+  const user = this;
+  user.password = await bcrypt.hash(
+    user.password,
+    Number(config.bcrypt_salt_round)
+  );
+  next();
+});
+studentSchema.post("save", function (doc, next) {
+  doc.password = "";
+  next();
+});
+// query middleware
+studentSchema.pre("find", async function (next) {
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
+studentSchema.pre("findOne", async function (next) {
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
+studentSchema.pre("aggregate", async function (next) {
+  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
+  next();
 });
 
 // creating a custom static method
