@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
+import { UserService } from "./user.service";
 
 const createStudent = async (req: Request, res: Response) => {
   try {
-    const { student: studentData } = req.body;
-    const zodParsedData = studentValidationSchema.parse(studentData);
+    const { password, student: studentData } = req.body;
+    // const zodParsedData = studentValidationSchema.parse(studentData);
     // call service function
-    const result = await StudentServices.createStudentIntoDB(zodParsedData);
+    const result = await UserService.createStudentIntoDB(password, studentData);
     res.status(200).json({
       success: true,
       message: "student created successfully",
@@ -18,4 +19,7 @@ const createStudent = async (req: Request, res: Response) => {
       error: err,
     });
   }
+};
+export const UserControllers = {
+  createStudent,
 };
