@@ -3,6 +3,7 @@ import cors from "cors";
 import { StudentRoutes } from "./app/modules/student/student.route";
 import { UserRoutes } from "./app/modules/user/user.routes";
 import globalErrorHandler from "./app/middleware/globalErrorHandler";
+import notFound from "./app/middleware/notFound";
 const app: Application = express();
 const port = 3000;
 // parsers
@@ -16,4 +17,5 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use(globalErrorHandler);
+app.use(notFound);
 export default app;
