@@ -6,7 +6,6 @@ import globalErrorHandler from "./app/middleware/globalErrorHandler";
 import notFound from "./app/middleware/notFound";
 import router from "./app/routes";
 const app: Application = express();
-const port = 3000;
 // parsers
 app.use(express.json());
 app.use(cors());
