@@ -77,83 +77,88 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
 // this is for instance method
 // const studentSchema = new Schema<TStudent, StudentModel, StudentMethod>({
 // this is for static
-const studentSchema = new Schema<TStudent, StudentModel>({
-  id: {
-    type: String,
-    unique: true,
-    required: [true, "Student ID is required"],
-  },
-  user: {
-    type: Schema.Types.ObjectId,
-    required: [true, "user id  is required"],
-    unique: true,
-    ref: "UserModel",
-  },
-  name: {
-    type: userNameSchema,
-    required: [true, "Student's name is required"],
-  },
-  gender: {
-    type: String,
-    enum: {
-      values: ["male", "female", "other"],
-      message: "{VALUE} is not a valid gender",
+const studentSchema = new Schema<TStudent, StudentModel>(
+  {
+    id: {
+      type: String,
+      unique: true,
+      required: [true, "Student ID is required"],
     },
-    required: [true, "Gender is required"],
+    user: {
+      type: Schema.Types.ObjectId,
+      required: [true, "user id  is required"],
+      unique: true,
+      ref: "UserModel",
+    },
+    name: {
+      type: userNameSchema,
+      required: [true, "Student's name is required"],
+    },
+    gender: {
+      type: String,
+      enum: {
+        values: ["male", "female", "other"],
+        message: "{VALUE} is not a valid gender",
+      },
+      required: [true, "Gender is required"],
+    },
+    dateOfBirth: {
+      type: Date,
+    },
+    email: {
+      type: String,
+      unique: true,
+      required: [true, "Email is required"],
+    },
+    contactNumber: {
+      type: String,
+      required: [true, "Contact number is required"],
+    },
+    emergencyContactNo: {
+      type: String,
+      required: [true, "Emergency contact number is required"],
+    },
+    bloodGroup: {
+      type: String,
+      enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
+      required: [true, "Blood group is required"],
+    },
+    presentAddress: {
+      type: String,
+      required: [true, "Present address is required"],
+    },
+    permanentAddress: {
+      type: String,
+      required: [true, "Permanent address is required"],
+    },
+    guardian: {
+      type: guardianSchema,
+      required: [true, "Guardian information is required"],
+    },
+    localGuardian: {
+      type: localGuardianSchema,
+      required: [true, "Local guardian information is required"],
+    },
+    profileImg: {
+      type: String,
+    },
+    admissionSemester: {
+      type: Schema.Types.ObjectId,
+      ref: "AcademicSemester",
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    academicDepartment: {
+      type: Schema.Types.ObjectId,
+      ref: "AcademicDepartment",
+    },
   },
-  dateOfBirth: {
-    type: Date,
-  },
-  email: {
-    type: String,
-    unique: true,
-    required: [true, "Email is required"],
-  },
-  contactNumber: {
-    type: String,
-    required: [true, "Contact number is required"],
-  },
-  emergencyContactNo: {
-    type: String,
-    required: [true, "Emergency contact number is required"],
-  },
-  bloodGroup: {
-    type: String,
-    enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
-    required: [true, "Blood group is required"],
-  },
-  presentAddress: {
-    type: String,
-    required: [true, "Present address is required"],
-  },
-  permanentAddress: {
-    type: String,
-    required: [true, "Permanent address is required"],
-  },
-  guardian: {
-    type: guardianSchema,
-    required: [true, "Guardian information is required"],
-  },
-  localGuardian: {
-    type: localGuardianSchema,
-    required: [true, "Local guardian information is required"],
-  },
-  profileImg: {
-    type: String,
-  },
-  admissionSemester: {
-    type: Schema.Types.ObjectId,
-    ref: "AcademicSemester",
-  },
-  isDeleted: {
-    type: Boolean,
-    default: false,
-  },
-  academicDepartment: {
-    type: Schema.Types.ObjectId,
-    ref: "AcademicDepartment",
-  },
-});
+  {
+    timestamps: true,
+  }
+);
 
 // query middleware
 studentSchema.pre("find", async function (next) {
