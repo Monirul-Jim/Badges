@@ -1,6 +1,7 @@
 import QueryBuilder from "../../../builder/QueryBuilder";
 import AppError from "../../errors/AppError";
 import { AcademicSemester } from "../academicSemester/academicSemester.models";
+import { RegistrationStatus } from "./semesterRegistration.constant";
 import { TSemesterRegistration } from "./semesterRegistration.interface";
 import { SemesterRegistration } from "./semesterRegistration.model";
 
@@ -11,7 +12,10 @@ const createSemesterRegistrationIntoDB = async (
   // check if there any registered semester that is already UPCOMING | ONGOING
   const isThereAnyUpcomingOrOngoingSemester =
     await SemesterRegistration.findOne({
-      $or: [{ status: "UPCOMING" }, { status: "ONGOING" }],
+      $or: [
+        { status: RegistrationStatus.UPCOMING },
+        { status: RegistrationStatus.ONGOING },
+      ],
     });
   if (isThereAnyUpcomingOrOngoingSemester) {
     throw new AppError(
@@ -67,19 +71,25 @@ const updateSemesterRegistrationIntoDB = async (
   // if the request semester registration is ended we will not update anything
   const currentSemesterStatus = isSemesterRegistrationExists?.status;
   const requestedStatus = payload.status;
-  if (currentSemesterStatus === "ENDED") {
+  if (currentSemesterStatus === RegistrationStatus.ENDED) {
     throw new AppError(
       400,
       `This Semester is already ${currentSemesterStatus} registered`
     );
   }
-  if (currentSemesterStatus === "UPCOMING" && requestedStatus === "ENDED") {
+  if (
+    currentSemesterStatus === RegistrationStatus.UPCOMING &&
+    requestedStatus === RegistrationStatus.ENDED
+  ) {
     throw new AppError(
       404,
       `You cannot directly change status ${currentSemesterStatus} to ${requestedStatus}`
     );
   }
-  if (currentSemesterStatus === "ONGOING" && requestedStatus === "UPCOMING") {
+  if (
+    currentSemesterStatus === RegistrationStatus.ONGOING &&
+    requestedStatus === RegistrationStatus.UPCOMING
+  ) {
     throw new AppError(
       404,
       `You cannot directly change status ${currentSemesterStatus} to ${requestedStatus}`
