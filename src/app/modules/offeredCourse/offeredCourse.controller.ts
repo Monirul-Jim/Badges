@@ -43,14 +43,16 @@ const getSingleOfferedCourse = catchAsync(
   }
 );
 const updateOfferedCourse = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
   const result = await OfferedCourseServices.createOfferedCourseIntoDB(
+    id,
     req.body
   );
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Offered Course is created successfully",
+    message: "Offered Course  updated successfully",
     data: result,
   });
 });

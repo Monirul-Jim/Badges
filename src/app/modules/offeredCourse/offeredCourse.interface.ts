@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-type Days = "Sat" | "Sun" | "Mon" | "Tue" | "Wed" | "Thu" | "Fri";
+export type Days = "Sat" | "Sun" | "Mon" | "Tue" | "Wed" | "Thu" | "Fri";
 
 export type TOfferedCourse = {
   semesterRegistration: Types.ObjectId;

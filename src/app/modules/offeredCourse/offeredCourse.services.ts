@@ -3,9 +3,11 @@ import { AcademicDepartment } from "../academicDepartment/academicDepartment.mod
 import { AcademicFaculty } from "../academicFaculty/academicFaculty.model";
 import { Course } from "../course/course.model";
 import { Faculty } from "../faculty/faculty.model";
+import { SemesterRegistrationStatus } from "../semesterRegistration/semesterRegistration.constant";
 import { SemesterRegistration } from "../semesterRegistration/semesterRegistration.model";
 import { TOfferedCourse } from "./offeredCourse.interface";
 import { OfferedCourse } from "./offeredCourse.model";
+import { hasTimeConflict } from "./offeredCourse.utils";
 
 const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
   const {
@@ -15,6 +17,9 @@ const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
     course,
     faculty,
     section,
+    days,
+    startTime,
+    endTime,
   } = payload;
   const isSemesterRegistrationIsExists = await SemesterRegistration.findById(
     semesterRegistration
@@ -63,6 +68,20 @@ const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
       "Offered course with same section is already exists"
     );
   }
+
+  // get the schedule of the faculties
+  const assignSchedules = await OfferedCourse.find({
+    semesterRegistration,
+    faculty,
+    days: { $in: days },
+  }).select("days startTime endTime");
+  const newSchedules = { days, startTime, endTime };
+  if (hasTimeConflict(assignSchedules, newSchedules)) {
+    throw new AppError(
+      409,
+      "This faculty is not available at that time ! Choose other time or day"
+    );
+  }
   const result = await OfferedCourse.create({ ...payload, academicSemester });
   return result;
 };
@@ -76,9 +95,43 @@ const getSingleOfferedCourseFromDB = async (id: string) => {
 };
 const updateOfferedCourseIntoDB = async (
   id: string,
-  payload: Partial<TOfferedCourse>
+  payload: Pick<TOfferedCourse, "faculty" | "days" | "startTime" | "endTime">
 ) => {
-  const result = "am";
+  const { faculty, days, startTime, endTime } = payload;
+  const isOfferedCourseExists = await OfferedCourse.findById(id);
+  if (!isOfferedCourseExists) {
+    throw new AppError(404, "Offered course not found !");
+  }
+  const isFacultyExists = await Faculty.findById(faculty);
+  if (!isFacultyExists) {
+    throw new AppError(404, " Faculty not found !");
+  }
+  const semesterRegistration = isOfferedCourseExists.semesterRegistration;
+  const semesterRegistrationStatus = await SemesterRegistration.findById(
+    semesterRegistration
+  );
+  if (semesterRegistrationStatus?.status !== "UPCOMING") {
+    throw new AppError(
+      400,
+      `You cant update this offered course as when it is ${semesterRegistrationStatus?.status}`
+    );
+  }
+  // get the schedule of the faculties
+  const assignSchedules = await OfferedCourse.find({
+    semesterRegistration,
+    faculty,
+    days: { $in: days },
+  }).select("days startTime endTime");
+  const newSchedules = { days, startTime, endTime };
+  if (hasTimeConflict(assignSchedules, newSchedules)) {
+    throw new AppError(
+      409,
+      "This faculty is not available at that time ! Choose other time or day"
+    );
+  }
+  const result = await OfferedCourse.findByIdAndUpdate(id, payload, {
+    new: true,
+  });
   return result;
 };
 
