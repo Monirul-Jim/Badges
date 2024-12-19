@@ -1,8 +1,8 @@
 import { model, Schema } from "mongoose";
-import { TUser } from "./user.interface";
+import { TUser, UserModelStatic } from "./user.interface";
 import config from "../../config/config";
 import bcrypt from "bcrypt";
-const userSchema = new Schema<TUser>(
+const userSchema = new Schema<TUser, UserModelStatic>(
   {
     id: {
       type: String,
@@ -12,6 +12,7 @@ const userSchema = new Schema<TUser>(
     password: {
       type: String,
       required: true,
+      select: 0,
     },
     needPasswordChange: {
       type: Boolean,
@@ -35,7 +36,6 @@ const userSchema = new Schema<TUser>(
     timestamps: true,
   }
 );
-export const UserModel = model<TUser>("User", userSchema);
 // pre save middleware/hook
 userSchema.pre("save", async function (next) {
   const user = this;
@@ -49,3 +49,21 @@ userSchema.post("save", function (doc, next) {
   doc.password = "";
   next();
 });
+userSchema.statics.isUserExistsByCustomId = async function (id: string) {
+  return await UserModel.findOne({ id });
+};
+userSchema.statics.isPasswordMatched = async function (
+  plainTextPassword,
+  hashedPassword
+) {
+  return await bcrypt.compare(plainTextPassword, hashedPassword);
+};
+// userSchema.statics.isUserDeleted = async function (id: string) {
+//   const user = await UserModel.findOne({ id });
+//   return user ? user.isDeleted : false;
+// };
+// userSchema.statics.isUserBlocked = async function (id: string) {
+//   const user = await UserModel.findOne({ id });
+//   return user ? user.status === "blocked" : false;
+// };
+export const UserModel = model<TUser, UserModelStatic>("User", userSchema);
