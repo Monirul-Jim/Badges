@@ -5,6 +5,7 @@ export interface TUser {
   id: string;
   password: string;
   needPasswordChange: boolean;
+  passwordChangedAt?: Date;
   role: "admin" | "student" | "faculty";
   status: "active" | "blocked";
   isDeleted: boolean;
@@ -15,6 +16,10 @@ export interface UserModelStatic extends Model<TUser> {
     plainTextPassword: string,
     hashedPassword: string
   ): Promise<boolean>;
+  isJWTIssuedBeforePasswordChanged(
+    passwordChangedTimestamp: Date,
+    jwtIssuedTimestamp: number
+  ): boolean;
   // isUserDeleted(id: string): Promise<boolean>;
   // isUserBlocked(id: string): Promise<boolean>;
 }
