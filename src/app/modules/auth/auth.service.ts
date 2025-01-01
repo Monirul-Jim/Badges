@@ -4,6 +4,7 @@ import { UserModel } from "../user/user.models";
 import { TLoginUser } from "./auth.interface";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { createToken } from "./auth.utils";
 const loginUserDB = async (payload: TLoginUser) => {
   const user = await UserModel.isUserExistsByCustomId(payload?.id);
   // if the user is exists
@@ -37,18 +38,19 @@ const loginUserDB = async (payload: TLoginUser) => {
     userId: user.id,
     role: user.role,
   };
-  const accessToken = jwt.sign(
-    {
-      jwtPayload,
-    },
+  const accessToken = createToken(
+    jwtPayload,
     config.jwt_access_secret as string,
-    {
-      expiresIn: "10d",
-    }
+    config.jwt_access_expired_in as string
   );
-
+  const refreshToken = createToken(
+    jwtPayload,
+    config.jwt_refresh_secret as string,
+    config.jwt_refresh_expired_in as string
+  );
   return {
     accessToken,
+    refreshToken,
     needPasswordChange: user.needPasswordChange,
   };
 };
