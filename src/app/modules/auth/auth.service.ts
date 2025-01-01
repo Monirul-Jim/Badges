@@ -158,7 +158,7 @@ const refreshToken = async (token: string) => {
     accessToken,
   };
 };
-const forgetPassword = async (userId: string, token: string) => {
+const forgetPassword = async (userId: string) => {
   const user = await UserModel.isUserExistsByCustomId(userId);
   // if the user is exists
 
@@ -191,7 +191,7 @@ const forgetPassword = async (userId: string, token: string) => {
     "10m"
   );
   const resetUiLink = `${config.reset_pass_ui_link}?id=${user?.id}&token=${resetToken}`;
-  console.log(resetUiLink);
+
   sendEmail(user?.email, resetUiLink);
 };
 const resetPassword = async (
