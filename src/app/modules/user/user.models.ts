@@ -2,6 +2,7 @@ import { model, Schema } from "mongoose";
 import { TUser, UserModelStatic } from "./user.interface";
 import config from "../../config/config";
 import bcrypt from "bcrypt";
+import { UserStatus } from "./user.constant";
 const userSchema = new Schema<TUser, UserModelStatic>(
   {
     id: {
@@ -32,7 +33,7 @@ const userSchema = new Schema<TUser, UserModelStatic>(
     },
     status: {
       type: String,
-      enum: ["active", "blocked"],
+      enum: UserStatus,
       default: "active",
     },
     isDeleted: {
