@@ -194,9 +194,37 @@ const forgetPassword = async (userId: string, token: string) => {
   console.log(resetUiLink);
   sendEmail(user?.email, resetUiLink);
 };
+const resetPassword = async (
+  payload: { id: string; newPassword: string },
+  token: string
+) => {
+  const user = await UserModel.isUserExistsByCustomId(payload.id);
+  // if the user is exists
+
+  if (!user) {
+    throw new AppError(404, "This user is not found!");
+  }
+  // check if the user is already deleted
+  // if (await UserModel.isUserDeleted(user?.id)) {
+  //   throw new AppError(403, "This user is already deleted");
+  // }
+  const isDeleted = user?.isDeleted;
+  if (isDeleted) {
+    throw new AppError(403, "This user is already deleted");
+  }
+  // check if the user is blocked
+  // if (await UserModel.isUserBlocked(user?.id)) {
+  //   throw new AppError(403, "This user is blocked");
+  // }
+  const userStatus = user?.status;
+  if (userStatus === "blocked") {
+    throw new AppError(403, "This user is blocked");
+  }
+};
 export const AuthServices = {
   loginUserDB,
   changePassword,
   refreshToken,
   forgetPassword,
+  resetPassword,
 };
