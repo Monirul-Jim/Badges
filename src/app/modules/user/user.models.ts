@@ -69,4 +69,12 @@ userSchema.statics.isPasswordMatched = async function (
 //   const user = await UserModel.findOne({ id });
 //   return user ? user.status === "blocked" : false;
 // };
+userSchema.statics.isJWTIssuedBeforePasswordChanged = function (
+  passwordChangedTimestamp: Date,
+  jwtIssuedTimestamp: number
+) {
+  const passwordChangedTime =
+    new Date(passwordChangedTimestamp).getTime() / 1000;
+  return passwordChangedTime > jwtIssuedTimestamp;
+};
 export const UserModel = model<TUser, UserModelStatic>("User", userSchema);
