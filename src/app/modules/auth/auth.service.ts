@@ -4,7 +4,7 @@ import { UserModel } from "../user/user.models";
 import { TLoginUser } from "./auth.interface";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { createToken } from "./auth.utils";
+import { createToken, verifyToken } from "./auth.utils";
 import { sendEmail } from "../../utils/sendEmail";
 const loginUserDB = async (payload: TLoginUser) => {
   const user = await UserModel.isUserExistsByCustomId(payload?.id);
@@ -107,10 +107,7 @@ const changePassword = async (
 };
 const refreshToken = async (token: string) => {
   // check if the token is valid
-  const decoded = jwt.verify(
-    token,
-    config.jwt_refresh_secret as string
-  ) as JwtPayload;
+  const decoded = verifyToken(token, config.jwt_refresh_secret as string);
   const { userId, iat } = decoded;
 
   const user = await UserModel.isUserExistsByCustomId(userId);
