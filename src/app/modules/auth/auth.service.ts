@@ -220,6 +220,28 @@ const resetPassword = async (
   if (userStatus === "blocked") {
     throw new AppError(403, "This user is blocked");
   }
+  const decoded = jwt.verify(
+    token,
+    config.jwt_access_secret as string
+  ) as JwtPayload;
+  if (payload.id !== decoded.userId) {
+    throw new AppError(403, "Credentials does not match");
+  }
+  // hashed new password
+  const newHashedPassword = await bcrypt.hash(
+    payload?.newPassword,
+    Number(config.bcrypt_salt_round)
+  );
+  await UserModel.findOneAndUpdate(
+    {
+      id: decoded.userId,
+      role: decoded.role,
+    },
+    {
+      password: newHashedPassword,
+      passwordChangedAt: new Date(),
+    }
+  );
 };
 export const AuthServices = {
   loginUserDB,

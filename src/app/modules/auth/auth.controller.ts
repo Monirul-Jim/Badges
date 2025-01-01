@@ -1,4 +1,5 @@
 import config from "../../config/config";
+import AppError from "../../errors/AppError";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
@@ -53,6 +54,9 @@ const forgetPassword = catchAsync(async (req, res) => {
 });
 const resetPassword = catchAsync(async (req, res) => {
   const token = req.headers.authorization;
+  if (!token) {
+    throw new AppError(400, "Something went wrong !");
+  }
   const result = await AuthServices.resetPassword(req.body, token);
 
   sendResponse(res, {
