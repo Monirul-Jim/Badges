@@ -19,7 +19,11 @@ import { Admin } from "../admin/admin.model";
 import { verifyToken } from "../auth/auth.utils";
 import { sendImageToCloudinary } from "../../utils/sendImageToCloudinary";
 
-const createStudentIntoDB = async (password: string, payload: TStudent) => {
+const createStudentIntoDB = async (
+  file: any,
+  password: string,
+  payload: TStudent
+) => {
   // create a user object
   const userData: Partial<TUser> = {};
   // if password is not given use default password
@@ -46,7 +50,9 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
     // manually generate id
     userData.id = await generateStudentId(admissionSemester);
     // send image to cloudinary
-    sendImageToCloudinary();
+    const imageName = `${userData?.id}${payload?.name?.firstName}`;
+    const path = file?.path;
+    const { secure_url } = await sendImageToCloudinary(imageName, path);
     // create a user (here transaction-1)
     const NewUser = await UserModel.create([userData], { session });
     // create a student
@@ -56,6 +62,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
     // set id, _id as user
     payload.id = NewUser[0].id; //embed id
     payload.user = NewUser[0]._id; //ref id
+    payload.profileImg = secure_url;
     // create a student (transaction-2)
     const newStudent = await Student.create([payload], { session });
     if (!newStudent.length) {

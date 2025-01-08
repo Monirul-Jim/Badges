@@ -1,23 +1,35 @@
 import { v2 as cloudinary } from "cloudinary";
 import config from "../config/config";
 import multer from "multer";
+import fs from "fs";
+cloudinary.config({
+  cloud_name: config.cloud_name,
+  api_key: config.api_key,
+  api_secret: config.api_secret,
+});
 
-export const sendImageToCloudinary = () => {
-  cloudinary.config({
-    cloud_name: config.cloud_name,
-    api_key: config.api_key,
-    api_secret: config.api_secret,
+export const sendImageToCloudinary = (imageName: string, path: string) => {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload(
+      path,
+      {
+        public_id: imageName,
+      },
+      function (error, result) {
+        if (error) {
+          reject(error);
+        }
+        resolve(result);
+        fs.unlink(path, (err) => {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log("file deleted");
+          }
+        });
+      }
+    );
   });
-
-  cloudinary.uploader.upload(
-    "https://res.cloudinary.com/demo/image/upload/getting-started/shoes.jpg",
-    {
-      public_id: "shoes",
-    },
-    function (error, result) {
-      console.log(result, error);
-    }
-  );
 };
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
